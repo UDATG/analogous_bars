@@ -1,5 +1,15 @@
 # README
-This repository contains code for the persistent extension method and analogous bars method from Iris Yoon, Chad Giusti, and Robert Ghrist's paper <font color="red">ADD LINK TO ARXIV </font>.   
+This repository contains code for the persistent extension method and analogous bars method from the paper <a href="https://arxiv.org/abs/2201.05190">"Persistent Extension and Analogous Bars: Data-Induced Relations Between Persistence Barcodes" (Yoon, Ghrist, and Giusti, 2022)</a>. If you use these methods, please cite as the following.
+
+@ARTICLE{yoonghristgiusti2022,  
+      title={Persistent Extension and Analogous Bars: Data-Induced Relations Between Persistence Barcodes},   
+      author={Hee Rhang Yoon and Robert Ghrist and Chad Giusti},  
+      journal= {ArXiv e-prints},  
+      archivePrefix={arXiv},  
+      year={2022},  
+      eprint={2201.05190},  
+      primaryClass={math.AT}
+}   
 
 ## Code
 * We implement the <b>persistent extension method</b> and the <b>analogous bars method</b>. 

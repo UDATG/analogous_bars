@@ -52,7 +52,9 @@ export
     plot_cycle_square_torus,
     select_intervals,
     get_multiclass_cyclerep,
-    get_Witness_cyclerep
+    get_Witness_cyclerep,
+    find_all_homology_classes,
+    plot_cycle_single_square_torus
 plotly()
 
 #############################################################################################
@@ -1308,6 +1310,35 @@ function plot_cycle_square_torus(P, # array of size (m,2)
         PC = Q
     end
     
+    for simplex in cycle
+        v1, v2 = simplex 
+        v1_theta, v1_phi = PC[v1,1], PC[v1,2]
+        v2_theta, v2_phi = PC[v2,1], PC[v2,2]
+        # If the simplex doesn't cross the square boundary, plot it:
+        if (abs(v1_theta - v2_theta) <= 4) && (abs(v1_phi - v2_phi) <= 4)
+            plot!(p, [v1_theta, v2_theta], [v1_phi, v2_phi], label = "", color = cycle_color, lw = cycle_linewidth)
+        end
+    end
+    return p
+end
+
+function plot_cycle_single_square_torus(P; # array of size (m,2)
+    cycle = [],
+    cycle_loc = "P",
+    cycle_color = :deeppink,
+    cycle_linewidth = 5,
+    P_color = "#008181", 
+    P_label = "",
+    P_markersize = 5,
+    P_marker = :circle,
+    kwargs...)
+    # plot one-dimensional cycle on square torus
+    p = plot(framestyle = :box, yaxis = nothing, xaxis = nothing; kwargs...)
+
+    # plot P
+    scatter!(p, P[:,1], P[:,2], color = P_color, label = P_label, markersize = P_markersize, marker = P_marker)    
+
+    PC = P
     for simplex in cycle
         v1, v2 = simplex 
         v1_theta, v1_phi = PC[v1,1], PC[v1,2]
@@ -3627,6 +3658,83 @@ function compute_distance_square_torus(X_theta, X_phi)
         end
     end
     return d
+end
+
+
+#----------------------------------------------------------------------------------------
+# functions for returning all possible homology classes corresponding to bars under different interval decompositions
+#----------------------------------------------------------------------------------------
+"""idx_to_vertex
+Given a cycle expressed using chain indices, convert them to an expression using vertex representation.
+
+Consider as inverse to function `chain_to_index`
+
+To test: Make sure that the last output is the same as `test_vertex` (minus column-wise ordering)
+test_idx = classrep(C, dim = 1, class = 4, format = "index")
+test_vertex = classrep(C, dim = 1, class = 4)
+idx_to_vertex(test_idx, 1, C)
+"""
+function idx_to_vertex(chain_idx, dim, C)
+    simplex_list = Array{Int64}(undef, 2,0)
+    for item in chain_idx
+        simplex = Eirene.incidentverts(C["farfaces"], C["firstv"], dim+1, [item])
+        simplex_list = hcat(simplex_list, sort(C["nvl2ovl"][simplex]))
+    end
+    return simplex_list
+end
+
+
+"""find_all_homology_classes
+Find all possible homology classes corresponding to selected bars of a barcode. 
+If selected_bars = [i,j], then find the homology classes that correspond to bar_i + bar_j
+
+### Arguments
+- `C`: (dict) Eirene output
+- `selected_bars`: (array) of selected bars. ex) [1] or [1,2,3]
+- `dim`: (int) dimension
+
+### Returns
+- `alternative_classes`: (dict) of alternative bar representations and their cycle representatives
+"""
+function find_all_homology_classes(C; selected_bars = [], dim = 1)
+    barcode_C = barcode(C, dim = dim)
+    
+    # check that selected_bars are valid
+    b = maximum(barcode_C[selected_bars,1])
+    d = minimum(barcode_C[selected_bars,2])
+    if d < b
+       throw(error("There is no parameter at which the selected bars are simultaneously present.")) 
+    end
+    
+    # select the smallest parameter at which all selected_bars are present
+    param = maximum(barcode_C[selected_bars,1])
+    
+    # Given bar `c` (selected_bar), find all coordinates 'r' such that matrix entry L_{r,c} can be non-zero.
+    nonzero_rows = ext.find_possible_nonzero_row_locations(barcode_C, param, selected_bars)
+
+    # For each 'c' in bar_extension, generate all possible c-th column vector of matrix L
+    possible_columns = ext.find_possible_column_vectors(nonzero_rows)
+
+    # Find all possible combinations of the column vectors. 
+    # note: any such combination is automatically linearly-independent.
+    possible_L = vcat(collect(Iterators.product([val for val in values(possible_columns)]...))...)
+
+    # For each possible column vectors of L, find the alternative bar-extension
+    # under interval decompostion D \circ L^{-1}
+    alt_extension = [sort(ext.select_odd_count(vcat(item...))) for item in possible_L]
+
+    unique!(alt_extension) # since F2 coefficients
+    
+    # for each alt_extension, find the homology class representatives
+    alternative_classes = Dict()
+    for bars in alt_extension
+        combined_classrep = vcat([classrep(C, class = i, dim = dim, format = "index") for i in bars]...)
+        combined_classrep = ext.select_odd_count(combined_classrep)
+        combined_classrep_v = idx_to_vertex(combined_classrep, dim, C)
+        alternative_classes[bars] = combined_classrep_v
+    end
+
+    return alternative_classes
 end
 
 end

@@ -3271,14 +3271,17 @@ function find_all_bar_representations(
     
     Ybar_rep_short = Dict()
     for epsilon in p_Y[2:end]
-        # find bar rho 
-        rho = find_birth_intervals_at_param(C_aux, epsilon, dim = dim)[1]
+        # find bar of barcode(C_aux) with birth time epsilon
+        rho = ext.find_birth_intervals_at_param(C_aux, epsilon, dim = dim)
+    
+        for i in rho
         
-        # find Y-bar representation of rho
-        rho_bar_rep = find_bar_representation(cyclereps[rho], C_Y, D_Y, epsilon, dim = dim)
+            # find Y-bar representation of rho
+            rho_bar_rep = ext.find_bar_representation(cyclereps[i], C_Y, D_Y, epsilon, dim = dim)
         
-        if rho_bar_rep != nothing
-            Ybar_rep_short[rho] = rho_bar_rep
+            if rho_bar_rep != nothing
+                Ybar_rep_short[i] = rho_bar_rep
+            end
         end
     end
     
@@ -3326,13 +3329,16 @@ function find_all_bar_representations_W(
     Ybar_rep_short = Dict()
     for epsilon in p_Y[2:end]
         # find bar of barcode(C_aux) with birth time epsilon
-        rho = find_birth_intervals_at_param(C_aux, epsilon, dim = dim)[1]
+        rho = ext.find_birth_intervals_at_param(C_aux, epsilon, dim = dim)
         
-        # find Y-bar representation of rho
-        rho_bar_rep = find_bar_representation_W(cyclereps[rho], W, epsilon, dim = dim)
+        for i in rho
         
-        if rho_bar_rep != nothing
-            Ybar_rep_short[rho] = rho_bar_rep
+            # find Y-bar representation of rho
+            rho_bar_rep = ext.find_bar_representation_W(cyclereps[i], W, epsilon, dim = dim)
+        
+            if rho_bar_rep != nothing
+                Ybar_rep_short[i] = rho_bar_rep
+            end
         end
     end
     

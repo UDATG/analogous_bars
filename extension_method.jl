@@ -834,7 +834,11 @@ function find_bar_extensions_at_parameter(
         epsilon = nontrivial_pY[i]
 
         ### baseline bar extension: The non-trivial bars of baseline bar extension at epsilon0
-        be_epsilon["baseline"] = [i for i in Ybar_rep_tau if epsilon < barcode_Y[i,2]]
+        if Ybar_rep_tau == nothing
+            be_epsilon["baseline"] = nothing
+        else
+            be_epsilon["baseline"] = [i for i in Ybar_rep_tau if epsilon < barcode_Y[i,2]]
+        end
         
         ### offset bar: find bars of C_aux that (1) exist at given epsilon and (2) whose bar representation in Y^{\epsilon} is nontrivial
         # (1) bars that exist at epsilon 

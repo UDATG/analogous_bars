@@ -14,6 +14,7 @@ This repository contains code for the persistent extension method and analogous 
 ## Code
 * We implement the <b>persistent extension method</b> and the <b>analogous bars method</b>. 
 * While the math works in all dimensions, our code implements the methods in dimension 1. 
+* The subset of code that computes the Witness (Dowker) persistence diagrams can be found at [Dowker_persistence](https://github.com/irishryoon/Dowker_persistence).
 
 ### Persistent extension method
 * The extension method compares two distinct filtrations built on a common point cloud. There are three different types of comparisons implemented in this repository: VR to VR, VR to W, and W to VR.
